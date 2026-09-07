@@ -13,7 +13,6 @@ public class ReuniaoService {
     private List<Reuniao> reunioes = new ArrayList<>();
 
     private int proximoIdReuniao = 1;
-    private int proximoIdAnalise = 1;
     private int proximoIdPendencia = 1;
 
     public ReuniaoService(PendenciaService pendenciaService) {
@@ -28,7 +27,12 @@ public class ReuniaoService {
         }
 
         for (Reuniao reuniao : reunioes) {
-            reuniao.exibirResumo();
+            System.out.println("ID: " + reuniao.getId());
+            System.out.println("Título: " + reuniao.getTitulo());
+            System.out.println("Data: " + reuniao.getData());
+            System.out.println("Status: " + reuniao.getStatus());
+            System.out.println("Sentimento: " + reuniao.getSentimento());
+            System.out.println("----------------------------");
         }
     }
 

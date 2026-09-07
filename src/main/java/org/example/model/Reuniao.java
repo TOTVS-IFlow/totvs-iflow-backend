@@ -134,23 +134,4 @@ public class Reuniao {
     public void adicionarPendencia(Pendencia pendencia){
         pendencias.add(pendencia);
     }
-
-    public void exibirResumo(){
-        System.out.println("ID Reunião: " + idMeeting);
-        System.out.println("Data: " + dataMeeting);
-        System.out.println("Formato: " + formatoMeeting);
-        System.out.println("Status: " + statusMeeting);
-
-        System.out.println("Transcrição:");
-
-        if (transcricao.length() > 50) {
-            System.out.println(transcricao.substring(0, 50) + "...");
-        } else {
-            System.out.println(transcricao);
-        }
-
-        cliente.exibirDados();
-
-        System.out.println();
-    }
 }
