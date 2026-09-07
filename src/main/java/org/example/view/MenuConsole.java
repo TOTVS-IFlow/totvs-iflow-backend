@@ -1,16 +1,13 @@
 package org.example.view;
 
-import org.example.model.HistoricoResolucao;
 import org.example.model.Pendencia;
 import org.example.service.PendenciaService;
 import org.example.service.ReuniaoService;
 
-import java.time.LocalDateTime;
 import java.util.Scanner;
 
 public class MenuConsole {
     private Scanner scanner = new Scanner(System.in);
-    private int proximoIdHistorico = 1;
 
     public void iniciar() {
         int opcao;
@@ -59,19 +56,7 @@ public class MenuConsole {
                     int id = scanner.nextInt();
                     scanner.nextLine();
 
-                    Pendencia pendencia = pendenciaService.buscarPorId(id);
-
-                    if (pendencia == null) {
-                        System.out.println("Pendência não encontrada.");
-                        break;
-                    }
-
-                    System.out.print("Descreva como ficou a resolução da pendência: ");
-                    String resolucao = scanner.nextLine();
-
-                    HistoricoResolucao historico = new HistoricoResolucao(proximoIdHistorico++, resolucao, LocalDateTime.now());
-
-                    pendenciaService.concluirPendencia(id, historico);
+                    pendenciaService.concluirPendencia(id);
 
                     break;
                 case 4:
