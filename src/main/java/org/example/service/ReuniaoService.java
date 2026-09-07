@@ -1,13 +1,16 @@
 package org.example.service;
 
-import org.example.model.*;
+import org.example.model.Cliente;
+import org.example.model.Pendencia;
+import org.example.model.ResultadoAnaliseIA;
+import org.example.model.Reuniao;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ReuniaoService {
+
     private PendenciaService pendenciaService;
     private GeminiService geminiService;
     private List<Reuniao> reunioes = new ArrayList<>();
@@ -21,6 +24,7 @@ public class ReuniaoService {
     }
 
     public void listarReunioes() {
+
         if (reunioes.isEmpty()) {
             System.out.println("Nenhuma reunião cadastrada.");
             return;
@@ -37,50 +41,58 @@ public class ReuniaoService {
     }
 
     public void analisarReuniao(String transcricao) {
-        System.out.println("Análise recebida:");
-        System.out.println(transcricao);
+
+        System.out.println("Analisando reunião...");
 
         ResultadoAnaliseIA resultado =
                 geminiService.analisarTranscricao(transcricao);
-        Analise analise = new Analise(proximoIdAnalise++, resultado.getResumo(), resultado.getSentimento(), LocalDateTime.now());
 
         Cliente cliente = new Cliente(
                 1,
-                "12345",
                 "Cliente",
-                false,
-                "SP",
-                "6201500",
-                "São Paulo",
                 "Varejo",
-                "Grande Porte",
-                LocalDate.now(),
-                75
+                "IFlow"
+        );
+
+        Reuniao reuniao = new Reuniao(
+                proximoIdReuniao++,
+                cliente,
+                "Análise de reunião",
+                LocalDateTime.now(),
+                "analyzed",
+                resultado.getSentimento(),
+                resultado.getResumo(),
+                resultado.getPontosAtencao(),
+                transcricao
         );
 
         for (String descricaoPendencia : resultado.getPendencias()) {
 
             Pendencia pendencia = new Pendencia(
                     proximoIdPendencia++,
-                    "ABERTA",
-                    descricaoPendencia
+                    reuniao,
+                    descricaoPendencia,
+                    null,
+                    "open"
             );
 
-            analise.adicionarPendencia(pendencia);
-
+            reuniao.adicionarPendencia(pendencia);
             pendenciaService.adicionarPendencia(pendencia);
         }
 
-        Reuniao reuniao = new Reuniao(proximoIdReuniao++, LocalDateTime.now(), "ÁUDIO", "COMPLETED", "01", LocalDateTime.now(), transcricao, true, cliente, analise);
         reunioes.add(reuniao);
 
         System.out.println();
         System.out.println("===== RESULTADO DA ANÁLISE =====");
 
-        analise.exibirResumo();
+        System.out.println("Resumo:");
+        System.out.println(reuniao.getResumo());
+
+        System.out.println("\nSentimento:");
+        System.out.println(reuniao.getSentimento());
 
         System.out.println("\nPontos de Atenção:");
-        System.out.println(resultado.getPontosAtencao());
+        System.out.println(reuniao.getPontoAtencao());
 
         System.out.println("\nPendências Geradas:");
 
@@ -90,8 +102,8 @@ public class ReuniaoService {
 
         } else {
 
-            for (String pendencia : resultado.getPendencias()) {
-                System.out.println("- " + pendencia);
+            for (Pendencia pendencia : reuniao.getPendencias()) {
+                System.out.println("- " + pendencia.getDescricao());
             }
         }
     }
