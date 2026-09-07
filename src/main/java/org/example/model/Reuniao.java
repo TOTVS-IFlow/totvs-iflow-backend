@@ -134,4 +134,93 @@ public class Reuniao {
     public void adicionarPendencia(Pendencia pendencia){
         pendencias.add(pendencia);
     }
+
+    public String calcularNivelRisco() {
+        boolean possuiRiscoMedio = false;
+
+        for (Risco risco : riscos) {
+            String nivel = risco.getNivel();
+
+            if (nivel == null) {
+                continue;
+            }
+
+            if (nivel.equalsIgnoreCase("high")) {
+                return "high";
+            }
+
+            if (nivel.equalsIgnoreCase("medium")) {
+                possuiRiscoMedio = true;
+            }
+        }
+
+        if (possuiRiscoMedio) {
+            return "medium";
+        }
+
+        return "low";
+    }
+
+    public double calcularPercentualPendenciasConcluidas() {
+        if (pendencias.isEmpty()) {
+            return 0.0;
+        }
+
+        int concluidas = 0;
+
+        for (Pendencia pendencia : pendencias) {
+            if (pendencia.getStatus() != null &&
+                    pendencia.getStatus().equalsIgnoreCase("done")) {
+                concluidas++;
+            }
+        }
+
+        return ((double) concluidas / pendencias.size()) * 100;
+    }
+
+    public String calcularPrioridade() {
+        int pontuacao = 0;
+
+        String nivelRisco = calcularNivelRisco();
+
+        if (nivelRisco.equalsIgnoreCase("high")) {
+            pontuacao += 3;
+        } else if (nivelRisco.equalsIgnoreCase("medium")) {
+            pontuacao += 2;
+        }
+
+        String sentimentoNormalizado =
+                sentimento == null ? "" : sentimento.trim().toLowerCase();
+
+        if (sentimentoNormalizado.equals("negative")) {
+            pontuacao += 2;
+        } else if (sentimentoNormalizado.equals("neutral")) {
+            pontuacao += 1;
+        }
+
+        int pendenciasAbertas = 0;
+
+        for (Pendencia pendencia : pendencias) {
+            if (pendencia.getStatus() != null &&
+                    pendencia.getStatus().equalsIgnoreCase("open")) {
+                pendenciasAbertas++;
+            }
+        }
+
+        if (pendenciasAbertas >= 3) {
+            pontuacao += 2;
+        } else if (pendenciasAbertas >= 1) {
+            pontuacao += 1;
+        }
+
+        if (pontuacao >= 6) {
+            return "CRITICA";
+        } else if (pontuacao >= 4) {
+            return "ALTA";
+        } else if (pontuacao >= 2) {
+            return "MEDIA";
+        }
+
+        return "BAIXA";
+    }
 }
