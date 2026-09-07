@@ -1,6 +1,5 @@
 package org.example.service;
 
-import org.example.model.HistoricoResolucao;
 import org.example.model.Pendencia;
 
 import java.util.ArrayList;
@@ -31,7 +30,11 @@ public class PendenciaService {
         }
 
         for (Pendencia pendencia : pendencias) {
-            pendencia.exibir();
+            System.out.println("ID: " + pendencia.getId());
+            System.out.println("Descrição: " + pendencia.getDescricao());
+            System.out.println("Responsável: " + pendencia.getResponsavel());
+            System.out.println("Status: " + pendencia.getStatus());
+            System.out.println("----------------------------");
         }
     }
 
@@ -39,14 +42,15 @@ public class PendenciaService {
         pendencias.add(pendencia);
     }
 
-    public void concluirPendencia(int id, HistoricoResolucao historico) {
-        for  (Pendencia pendencia : pendencias) {
-            if (pendencia.getId() == id) {
-                pendencia.concluir(historico);
-                System.out.println("Pendência concluida com sucesso!");
-                return;
-            }
+    public void concluirPendencia(int id) {
+        Pendencia pendencia = buscarPorId(id);
+
+        if (pendencia == null) {
+            System.out.println("Pendência não encontrada.");
+            return;
         }
-        System.out.println("Pendência não encontrada.");
+
+        pendencia.concluir();
+        System.out.println("Pendência concluida com sucesso!");
     }
 }
