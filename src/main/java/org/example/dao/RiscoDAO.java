@@ -81,6 +81,38 @@ public class RiscoDAO {
         return riscos;
     }
 
+    public List<Risco> buscarPorReuniaoId(int meetingId) {
+
+        String sql = """
+            SELECT *
+            FROM risks
+            WHERE meeting_id = ?
+            ORDER BY id ASC
+            """;
+
+        List<Risco> riscos = new ArrayList<>();
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, meetingId);
+
+            ResultSet result = statement.executeQuery();
+
+            while (result.next()) {
+                riscos.add(mapearRisco(result));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Erro ao buscar riscos da reunião.",
+                    e
+            );
+        }
+
+        return riscos;
+    }
+
     public void atualizar(Risco risco) {
 
         String sql = """
@@ -131,7 +163,7 @@ public class RiscoDAO {
         return new Risco(
                 result.getInt("id"),
                 reuniao,
-                result.getString("level"),
+                result.getString("risk_level"),
                 result.getString("description")
         );
     }

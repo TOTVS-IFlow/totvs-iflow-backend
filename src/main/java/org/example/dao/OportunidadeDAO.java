@@ -81,6 +81,38 @@ public class OportunidadeDAO {
         return oportunidades;
     }
 
+    public List<Oportunidade> buscarPorReuniaoId(int meetingId) {
+
+        String sql = """
+            SELECT *
+            FROM opportunities
+            WHERE meeting_id = ?
+            ORDER BY id ASC
+            """;
+
+        List<Oportunidade> oportunidades = new ArrayList<>();
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, meetingId);
+
+            ResultSet result = statement.executeQuery();
+
+            while (result.next()) {
+                oportunidades.add(mapearOportunidade(result));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Erro ao buscar oportunidades da reunião.",
+                    e
+            );
+        }
+
+        return oportunidades;
+    }
+
     public void atualizar(Oportunidade oportunidade) {
 
         String sql = """

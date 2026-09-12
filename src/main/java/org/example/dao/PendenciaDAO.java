@@ -97,6 +97,38 @@ public class PendenciaDAO {
         return pendencias;
     }
 
+    public List<Pendencia> buscarPorReuniaoId(int meetingId) {
+
+        String sql = """
+            SELECT *
+            FROM pending_items
+            WHERE meeting_id = ?
+            ORDER BY id ASC
+            """;
+
+        List<Pendencia> pendencias = new ArrayList<>();
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, meetingId);
+
+            ResultSet result = statement.executeQuery();
+
+            while (result.next()) {
+                pendencias.add(mapearPendencia(result));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Erro ao buscar pendências da reunião.",
+                    e
+            );
+        }
+
+        return pendencias;
+    }
+
     public void atualizar(Pendencia pendencia) {
 
         String sql = """
