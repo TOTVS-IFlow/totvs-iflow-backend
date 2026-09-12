@@ -1,6 +1,5 @@
 package org.example.dao;
 
-import com.sun.security.auth.UnixNumericUserPrincipal;
 import org.example.config.ConnectionFactory;
 import org.example.model.Usuario;
 
@@ -51,7 +50,7 @@ public class UsuarioDAO {
     }
 
     public List<Usuario> buscarTodos() {
-        String sql = "SELECT * FROM users";
+        String sql = "SELECT * FROM users ORDER BY id ASC";
 
         List<Usuario> usuarios = new ArrayList<>();
 

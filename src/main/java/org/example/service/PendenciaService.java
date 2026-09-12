@@ -1,28 +1,26 @@
 package org.example.service;
 
+import org.example.dao.PendenciaDAO;
 import org.example.model.Pendencia;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class PendenciaService {
-    private List<Pendencia> pendencias = new ArrayList<>();
+    private PendenciaDAO pendenciaDAO;
+    List<Pendencia> pendencias;
 
-    public List<Pendencia> getPendencias() {
-        return pendencias;
+    public PendenciaService() {
+        this.pendenciaDAO = new PendenciaDAO();
+        this.pendencias = pendenciaDAO.buscarTodos();
     }
 
     public Pendencia buscarPorId(int id) {
-        for (Pendencia pendencia: pendencias){
-            if (pendencia.getId() == id){
-                return pendencia;
-            }
-        }
-
-        return null;
+        return pendenciaDAO.buscarPorId(id);
     }
 
     public void listarPendencias() {
+
+        pendencias = pendenciaDAO.buscarTodos();
 
         if (pendencias.isEmpty()) {
             System.out.println("Nenhuma pendência encontrada!");
@@ -51,6 +49,9 @@ public class PendenciaService {
         }
 
         pendencia.concluir();
+
+        pendenciaDAO.atualizar(pendencia);
+
         System.out.println("Pendência concluida com sucesso!");
     }
 }

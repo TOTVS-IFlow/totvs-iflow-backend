@@ -1,9 +1,7 @@
 package org.example.service;
 
-import org.example.model.Cliente;
-import org.example.model.Pendencia;
-import org.example.model.ResultadoAnaliseIA;
-import org.example.model.Reuniao;
+import org.example.dao.*;
+import org.example.model.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,17 +11,27 @@ public class ReuniaoService {
 
     private PendenciaService pendenciaService;
     private GeminiService geminiService;
-    private List<Reuniao> reunioes = new ArrayList<>();
 
-    private int proximoIdReuniao = 1;
-    private int proximoIdPendencia = 1;
+    private ReuniaoDAO reuniaoDAO;
+    private ClienteDAO clienteDAO;
+    private PendenciaDAO pendenciaDAO;
+    private RiscoDAO riscoDAO;
+    private OportunidadeDAO oportunidadeDAO;
 
     public ReuniaoService(PendenciaService pendenciaService) {
         this.pendenciaService = pendenciaService;
         this.geminiService = new GeminiService();
+
+        this.reuniaoDAO = new ReuniaoDAO();
+        this.clienteDAO = new ClienteDAO();
+        this.pendenciaDAO = new PendenciaDAO();
+        this.riscoDAO = new RiscoDAO();
+        this.oportunidadeDAO = new OportunidadeDAO();
     }
 
     public void listarReunioes() {
+
+        List<Reuniao> reunioes = reuniaoDAO.buscarTodos();
 
         if (reunioes.isEmpty()) {
             System.out.println("Nenhuma reunião cadastrada.");
@@ -47,15 +55,15 @@ public class ReuniaoService {
         ResultadoAnaliseIA resultado =
                 geminiService.analisarTranscricao(transcricao);
 
-        Cliente cliente = new Cliente(
-                1,
-                "Cliente",
-                "Varejo",
-                "IFlow"
-        );
+        Cliente cliente = clienteDAO.buscarPorId(1);
+
+        if (cliente == null) {
+            System.out.println("Cliente não encontrado.");
+            return;
+        }
 
         Reuniao reuniao = new Reuniao(
-                proximoIdReuniao++,
+                0,
                 cliente,
                 "Análise de reunião",
                 LocalDateTime.now(),
@@ -66,21 +74,53 @@ public class ReuniaoService {
                 transcricao
         );
 
+        reuniaoDAO.salvar(reuniao);
+        System.out.println("ID da reunião após salvar: " + reuniao.getId());
+
+//        Salva pendencias
         for (String descricaoPendencia : resultado.getPendencias()) {
 
             Pendencia pendencia = new Pendencia(
-                    proximoIdPendencia++,
+                    0,
                     reuniao,
                     descricaoPendencia,
                     null,
                     "open"
             );
 
-            reuniao.adicionarPendencia(pendencia);
+            pendenciaDAO.salvar(pendencia);
             pendenciaService.adicionarPendencia(pendencia);
+
+            reuniao.adicionarPendencia(pendencia);
         }
 
-        reunioes.add(reuniao);
+//        Salva riscos
+        for (RiscoIA riscoIA : resultado.getRiscos()) {
+
+            Risco risco = new Risco(
+                    0,
+                    reuniao,
+                    riscoIA.getNivel(),
+                    riscoIA.getDescricao()
+            );
+
+            riscoDAO.salvar(risco);
+            reuniao.adicionarRisco(risco);
+        }
+
+//        Salva oportunidades
+        for (OportunidadeIA oportunidadeIA : resultado.getOportunidades()) {
+
+            Oportunidade oportunidade = new Oportunidade(
+                    0,
+                    reuniao,
+                    oportunidadeIA.getTag(),
+                    oportunidadeIA.getDescricao()
+            );
+
+            oportunidadeDAO.salvar(oportunidade);
+            reuniao.adicionarOportunidade(oportunidade);
+        }
 
         System.out.println();
         System.out.println("===== RESULTADO DA ANÁLISE =====");
@@ -104,6 +144,28 @@ public class ReuniaoService {
 
             for (Pendencia pendencia : reuniao.getPendencias()) {
                 System.out.println("- " + pendencia.getDescricao());
+            }
+        }
+
+        System.out.println("\nRiscos Identificados:");
+
+        if (resultado.getRiscos().isEmpty()) {
+            System.out.println("Nenhum risco encontrado.");
+        } else {
+            for (var risco : resultado.getRiscos()) {
+                System.out.println("- [" + risco.getNivel() + "] "
+                        + risco.getDescricao());
+            }
+        }
+
+        System.out.println("\nOportunidades Identificadas:");
+
+        if (resultado.getOportunidades().isEmpty()) {
+            System.out.println("Nenhuma oportunidade encontrada.");
+        } else {
+            for (var oportunidade : resultado.getOportunidades()) {
+                System.out.println("- [" + oportunidade.getTag() + "] "
+                        + oportunidade.getDescricao());
             }
         }
     }
