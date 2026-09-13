@@ -1,1 +1,4 @@
 gemini.api.key=CHAVE_API
+db.url=URL_CONEXAO
+db.user=USUARIO
+db.password=SENHA

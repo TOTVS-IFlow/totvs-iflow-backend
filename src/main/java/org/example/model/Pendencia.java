@@ -8,6 +8,7 @@ public class Pendencia {
     private String descricao;
     private String responsavel;
     private String status;
+    private LocalDateTime dataLimite;
     private LocalDateTime dataConclusao;
 
     public Pendencia(int id, Reuniao reuniao, String descricao, String responsavel, String status) {
@@ -40,11 +41,14 @@ public class Pendencia {
         return status;
     }
 
+    public LocalDateTime getDataLimite() {
+        return dataLimite;
+    }
     public LocalDateTime getDataConclusao() {
         return dataConclusao;
     }
 
-//    Setters
+    //    Setters
 
     public void setId(int id) {
         this.id = id;
@@ -64,6 +68,10 @@ public class Pendencia {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public void setDataLimite(LocalDateTime dataLimite) {
+        this.dataLimite = dataLimite;
     }
 
     public void setDataConclusao(LocalDateTime dataConclusao) {

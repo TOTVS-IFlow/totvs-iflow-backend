@@ -135,22 +135,92 @@ public class Reuniao {
         pendencias.add(pendencia);
     }
 
-    public void exibirResumo(){
-        System.out.println("ID Reunião: " + idMeeting);
-        System.out.println("Data: " + dataMeeting);
-        System.out.println("Formato: " + formatoMeeting);
-        System.out.println("Status: " + statusMeeting);
+    public String calcularNivelRisco() {
+        boolean possuiRiscoMedio = false;
 
-        System.out.println("Transcrição:");
+        for (Risco risco : riscos) {
+            String nivel = risco.getNivel();
 
-        if (transcricao.length() > 50) {
-            System.out.println(transcricao.substring(0, 50) + "...");
-        } else {
-            System.out.println(transcricao);
+            if (nivel == null) {
+                continue;
+            }
+
+            if (nivel.equalsIgnoreCase("high")) {
+                return "high";
+            }
+
+            if (nivel.equalsIgnoreCase("medium")) {
+                possuiRiscoMedio = true;
+            }
         }
 
-        cliente.exibirDados();
+        if (possuiRiscoMedio) {
+            return "medium";
+        }
 
-        System.out.println();
+        return "low";
+    }
+
+    public double calcularPercentualPendenciasConcluidas() {
+        if (pendencias.isEmpty()) {
+            return 0.0;
+        }
+
+        int concluidas = 0;
+
+        for (Pendencia pendencia : pendencias) {
+            if (pendencia.getStatus() != null &&
+                    pendencia.getStatus().equalsIgnoreCase("done")) {
+                concluidas++;
+            }
+        }
+
+        return ((double) concluidas / pendencias.size()) * 100;
+    }
+
+    public String calcularPrioridade() {
+        int pontuacao = 0;
+
+        String nivelRisco = calcularNivelRisco();
+
+        if (nivelRisco.equalsIgnoreCase("high")) {
+            pontuacao += 3;
+        } else if (nivelRisco.equalsIgnoreCase("medium")) {
+            pontuacao += 2;
+        }
+
+        String sentimentoNormalizado =
+                sentimento == null ? "" : sentimento.trim().toLowerCase();
+
+        if (sentimentoNormalizado.equals("negative")) {
+            pontuacao += 2;
+        } else if (sentimentoNormalizado.equals("neutral")) {
+            pontuacao += 1;
+        }
+
+        int pendenciasAbertas = 0;
+
+        for (Pendencia pendencia : pendencias) {
+            if (pendencia.getStatus() != null &&
+                    pendencia.getStatus().equalsIgnoreCase("open")) {
+                pendenciasAbertas++;
+            }
+        }
+
+        if (pendenciasAbertas >= 3) {
+            pontuacao += 2;
+        } else if (pendenciasAbertas >= 1) {
+            pontuacao += 1;
+        }
+
+        if (pontuacao >= 6) {
+            return "CRITICA";
+        } else if (pontuacao >= 4) {
+            return "ALTA";
+        } else if (pontuacao >= 2) {
+            return "MEDIA";
+        }
+
+        return "BAIXA";
     }
 }
