@@ -1,29 +1,26 @@
 package org.example.service;
 
-import org.example.model.HistoricoResolucao;
+import org.example.dao.PendenciaDAO;
 import org.example.model.Pendencia;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class PendenciaService {
-    private List<Pendencia> pendencias = new ArrayList<>();
+    private PendenciaDAO pendenciaDAO;
+    List<Pendencia> pendencias;
 
-    public List<Pendencia> getPendencias() {
-        return pendencias;
+    public PendenciaService() {
+        this.pendenciaDAO = new PendenciaDAO();
+        this.pendencias = pendenciaDAO.buscarTodos();
     }
 
     public Pendencia buscarPorId(int id) {
-        for (Pendencia pendencia: pendencias){
-            if (pendencia.getId() == id){
-                return pendencia;
-            }
-        }
-
-        return null;
+        return pendenciaDAO.buscarPorId(id);
     }
 
     public void listarPendencias() {
+
+        pendencias = pendenciaDAO.buscarTodos();
 
         if (pendencias.isEmpty()) {
             System.out.println("Nenhuma pendência encontrada!");
@@ -31,7 +28,11 @@ public class PendenciaService {
         }
 
         for (Pendencia pendencia : pendencias) {
-            pendencia.exibir();
+            System.out.println("ID: " + pendencia.getId());
+            System.out.println("Descrição: " + pendencia.getDescricao());
+            System.out.println("Responsável: " + pendencia.getResponsavel());
+            System.out.println("Status: " + pendencia.getStatus());
+            System.out.println("----------------------------");
         }
     }
 
@@ -39,14 +40,18 @@ public class PendenciaService {
         pendencias.add(pendencia);
     }
 
-    public void concluirPendencia(int id, HistoricoResolucao historico) {
-        for  (Pendencia pendencia : pendencias) {
-            if (pendencia.getId() == id) {
-                pendencia.concluir(historico);
-                System.out.println("Pendência concluida com sucesso!");
-                return;
-            }
+    public void concluirPendencia(int id) {
+        Pendencia pendencia = buscarPorId(id);
+
+        if (pendencia == null) {
+            System.out.println("Pendência não encontrada.");
+            return;
         }
-        System.out.println("Pendência não encontrada.");
+
+        pendencia.concluir();
+
+        pendenciaDAO.atualizar(pendencia);
+
+        System.out.println("Pendência concluida com sucesso!");
     }
 }

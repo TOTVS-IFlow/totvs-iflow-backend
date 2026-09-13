@@ -7,7 +7,15 @@ public class Usuario {
     private String senhaCriptografada;
     private String cargo;
 
-//    Getters
+    public Usuario(int id, String nome, String email, String senhaCriptografada, String cargo) {
+        this.id = id;
+        this.nome = nome;
+        this.email = email;
+        this.senhaCriptografada = senhaCriptografada;
+        this.cargo = cargo;
+    }
+
+    //    Getters
 
     public int getId() {
         return id;
