@@ -21,7 +21,7 @@ public class PendenciaDAO {
                 """;
 
         try (Connection connection = ConnectionFactory.getConnection();
-             PreparedStatement statement =  connection.prepareStatement(sql, new String[]{"ID"})) {
+             PreparedStatement statement = connection.prepareStatement(sql, new String[]{"ID"})) {
 
             statement.setInt(1, pendencia.getReuniao().getId());
             statement.setString(2, pendencia.getDescricao());
@@ -100,11 +100,11 @@ public class PendenciaDAO {
     public List<Pendencia> buscarPorReuniaoId(int meetingId) {
 
         String sql = """
-            SELECT *
-            FROM pending_items
-            WHERE meeting_id = ?
-            ORDER BY id ASC
-            """;
+                SELECT *
+                FROM pending_items
+                WHERE meeting_id = ?
+                ORDER BY id ASC
+                """;
 
         List<Pendencia> pendencias = new ArrayList<>();
 
@@ -204,5 +204,54 @@ public class PendenciaDAO {
         }
 
         return pendencia;
+    }
+
+
+    public List<Pendencia> buscarParaApi(String status, Integer clientId) {
+
+        StringBuilder sql = new StringBuilder("""
+                SELECT p.*, m.client_id
+                FROM pending_items p
+                JOIN meetings m ON m.id = p.meeting_id
+                WHERE 1 = 1
+                """);
+
+        if (status != null && !status.isBlank()) {
+            sql.append(" AND LOWER(p.status) = LOWER(?)");
+        }
+
+        if (clientId != null) {
+            sql.append(" AND m.client_id = ?");
+        }
+
+        sql.append(" ORDER BY p.id ASC");
+
+        List<Pendencia> pendencias = new ArrayList<>();
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql.toString())) {
+
+            int parametro = 1;
+
+            if (status != null && !status.isBlank()) {
+                statement.setString(parametro++, status);
+            }
+
+            if (clientId != null) {
+                statement.setInt(parametro, clientId);
+            }
+
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    pendencias.add(mapearPendencia(result));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar pendências para a API.", e);
+        }
+
+        return pendencias;
     }
 }

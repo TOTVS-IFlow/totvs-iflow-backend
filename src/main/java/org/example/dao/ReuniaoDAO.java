@@ -99,6 +99,36 @@ public class ReuniaoDAO {
         return reunioes;
     }
 
+    public List<Reuniao> buscarPorClienteId(int clientId) {
+
+        String sql = """
+                SELECT m.*, c.name, c.sector, c.product
+                FROM meetings m
+                JOIN clients c ON c.id = m.client_id
+                WHERE m.client_id = ?
+                ORDER BY m.id
+                """;
+
+        List<Reuniao> reunioes = new ArrayList<>();
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, clientId);
+
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    reunioes.add(mapearReuniao(result));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar reuniões por cliente.", e);
+        }
+
+        return reunioes;
+    }
+
     public void atualizar(Reuniao reuniao) {
 
         String sql = """
