@@ -127,8 +127,20 @@ public class GeminiService {
                             HttpResponse.BodyHandlers.ofString()
                     );
 
-            JSONObject resposta =
-                    new JSONObject(response.body());
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                throw new RuntimeException(
+                        "Falha ao consultar o serviço de análise."
+                );
+            }
+
+            JSONObject resposta = new JSONObject(response.body());
+
+            if (!resposta.has("candidates")
+                    || resposta.getJSONArray("candidates").isEmpty()) {
+                throw new RuntimeException(
+                        "O serviço de análise não retornou um resultado válido."
+                );
+            }
 
             String texto =
                     resposta
@@ -142,23 +154,31 @@ public class GeminiService {
             return converterResposta(texto);
 
         } catch (Exception e) {
-
-            e.printStackTrace();
-
-            return new ResultadoAnaliseIA(
-                    "Erro ao analisar reunião.",
-                    "neutral",
-                    "Não foi possível analisar a reunião.",
-                    new ArrayList<>(),
-                    new ArrayList<>(),
-                    new ArrayList<>()
+            throw new RuntimeException(
+                    "Não foi possível concluir a análise da reunião.",
+                    e
             );
         }
     }
 
     private ResultadoAnaliseIA converterResposta(String texto) {
 
+        if (texto == null || texto.isBlank()) {
+            throw new RuntimeException(
+                    "O serviço de análise retornou uma resposta vazia."
+            );
+        }
+
+        texto = texto.trim();
+
+        if (texto.startsWith("```")) {
+            texto = texto.replaceFirst("^```(?:json)?\\s*", "");
+            texto = texto.replaceFirst("\\s*```$", "");
+        }
+
         JSONObject json = new JSONObject(texto);
+
+        validarResultado(json);
 
         List<String> pendencias = new ArrayList<>();
 
@@ -215,5 +235,42 @@ public class GeminiService {
                 riscos,
                 oportunidades
         );
+    }
+
+    private void validarResultado(JSONObject json) {
+
+        String sentimento = json.getString("sentimento");
+
+        if (!List.of("positive", "neutral", "negative")
+                .contains(sentimento)) {
+            throw new RuntimeException(
+                    "O serviço de análise retornou um sentimento inválido."
+            );
+        }
+
+        JSONArray riscos = json.getJSONArray("riscos");
+
+        for (int i = 0; i < riscos.length(); i++) {
+            String nivel = riscos.getJSONObject(i).getString("nivel");
+
+            if (!List.of("low", "medium", "high").contains(nivel)) {
+                throw new RuntimeException(
+                        "O serviço de análise retornou um nível de risco inválido."
+                );
+            }
+        }
+
+        JSONArray oportunidades = json.getJSONArray("oportunidades");
+
+        for (int i = 0; i < oportunidades.length(); i++) {
+            String tag = oportunidades.getJSONObject(i).getString("tag");
+
+            if (!List.of("upsell", "crosssell", "expansion", "addon", "renewal")
+                    .contains(tag)) {
+                throw new RuntimeException(
+                        "O serviço de análise retornou uma oportunidade inválida."
+                );
+            }
+        }
     }
 }

@@ -45,6 +45,46 @@ public class ReuniaoDAO {
         }
     }
 
+
+    public void salvar(Connection connection, Reuniao reuniao) {
+
+        String sql = """
+                INSERT INTO meetings (
+                    client_id, title, meeting_date, status,
+                    sentiment, summary, attention_point, transcript
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(
+                sql, new String[]{"ID"})) {
+
+            statement.setInt(1, reuniao.getCliente().getId());
+            statement.setString(2, reuniao.getTitulo());
+            statement.setTimestamp(3, Timestamp.valueOf(reuniao.getData()));
+            statement.setString(4, reuniao.getStatus());
+            statement.setString(5, reuniao.getSentimento());
+            statement.setString(6, reuniao.getResumo());
+            statement.setString(7, reuniao.getPontoAtencao());
+            statement.setString(8, reuniao.getTranscricao());
+
+            statement.executeUpdate();
+
+            try (ResultSet result = statement.getGeneratedKeys()) {
+                if (result.next()) {
+                    reuniao.setId(result.getInt(1));
+                } else {
+                    throw new SQLException(
+                            "Não foi possível recuperar o ID da reunião."
+                    );
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao salvar reunião.", e);
+        }
+    }
+
     public Reuniao buscarPorId(int id) {
 
         String sql = """
@@ -94,6 +134,36 @@ public class ReuniaoDAO {
 
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao buscar reuniões.", e);
+        }
+
+        return reunioes;
+    }
+
+    public List<Reuniao> buscarPorClienteId(int clientId) {
+
+        String sql = """
+                SELECT m.*, c.name, c.sector, c.product
+                FROM meetings m
+                JOIN clients c ON c.id = m.client_id
+                WHERE m.client_id = ?
+                ORDER BY m.id
+                """;
+
+        List<Reuniao> reunioes = new ArrayList<>();
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, clientId);
+
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    reunioes.add(mapearReuniao(result));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar reuniões por cliente.", e);
         }
 
         return reunioes;

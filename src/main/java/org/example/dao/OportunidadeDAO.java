@@ -34,6 +34,27 @@ public class OportunidadeDAO {
         }
     }
 
+
+    public void salvar(Connection connection, Oportunidade oportunidade) {
+
+        String sql = """
+                INSERT INTO opportunities (meeting_id, tag, description)
+                VALUES (?, ?, ?)
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, oportunidade.getReuniao().getId());
+            statement.setString(2, oportunidade.getTag());
+            statement.setString(3, oportunidade.getDescricao());
+
+            statement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao salvar oportunidade.", e);
+        }
+    }
+
     public Oportunidade buscarPorId(int id) {
 
         String sql = """
@@ -84,11 +105,11 @@ public class OportunidadeDAO {
     public List<Oportunidade> buscarPorReuniaoId(int meetingId) {
 
         String sql = """
-            SELECT *
-            FROM opportunities
-            WHERE meeting_id = ?
-            ORDER BY id ASC
-            """;
+                SELECT *
+                FROM opportunities
+                WHERE meeting_id = ?
+                ORDER BY id ASC
+                """;
 
         List<Oportunidade> oportunidades = new ArrayList<>();
 
