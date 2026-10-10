@@ -1,13 +1,15 @@
 package org.example.dto;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 public class ReuniaoResumoDTO {
 
     private int id;
     private String client;
     private String title;
-    private LocalDateTime date;
+    private Instant date;
     private String status;
     private String sentiment;
     private int openPendingCount;
@@ -23,7 +25,9 @@ public class ReuniaoResumoDTO {
         this.id = id;
         this.client = client;
         this.title = title;
-        this.date = date;
+        this.date = date == null
+                ? null
+                : date.atZone(ZoneId.of("America/Sao_Paulo")).toInstant();
         this.status = status;
         this.sentiment = sentiment;
         this.openPendingCount = openPendingCount;
@@ -41,7 +45,7 @@ public class ReuniaoResumoDTO {
         return title;
     }
 
-    public LocalDateTime getDate() {
+    public Instant getDate() {
         return date;
     }
 

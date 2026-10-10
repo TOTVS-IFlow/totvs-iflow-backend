@@ -50,6 +50,39 @@ public class PendenciaDAO {
         }
     }
 
+
+    public void salvar(Connection connection, Pendencia pendencia) {
+
+        String sql = """
+                INSERT INTO pending_items (meeting_id, description, owner, status)
+                VALUES (?, ?, ?, ?)
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(
+                sql, new String[]{"ID"})) {
+
+            statement.setInt(1, pendencia.getReuniao().getId());
+            statement.setString(2, pendencia.getDescricao());
+            statement.setString(3, pendencia.getResponsavel());
+            statement.setString(4, pendencia.getStatus());
+
+            statement.executeUpdate();
+
+            try (ResultSet result = statement.getGeneratedKeys()) {
+                if (result.next()) {
+                    pendencia.setId(result.getInt(1));
+                } else {
+                    throw new SQLException(
+                            "Não foi possível recuperar o ID da pendência."
+                    );
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao salvar pendência.", e);
+        }
+    }
+
     public Pendencia buscarPorId(int id) {
 
         String sql = """

@@ -34,6 +34,27 @@ public class RiscoDAO {
         }
     }
 
+
+    public void salvar(Connection connection, Risco risco) {
+
+        String sql = """
+                INSERT INTO risks (meeting_id, risk_level, description)
+                VALUES (?, ?, ?)
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, risco.getReuniao().getId());
+            statement.setString(2, risco.getNivel());
+            statement.setString(3, risco.getDescricao());
+
+            statement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao salvar risco.", e);
+        }
+    }
+
     public Risco buscarPorId(int id) {
 
         String sql = """
@@ -84,11 +105,11 @@ public class RiscoDAO {
     public List<Risco> buscarPorReuniaoId(int meetingId) {
 
         String sql = """
-            SELECT *
-            FROM risks
-            WHERE meeting_id = ?
-            ORDER BY id ASC
-            """;
+                SELECT *
+                FROM risks
+                WHERE meeting_id = ?
+                ORDER BY id ASC
+                """;
 
         List<Risco> riscos = new ArrayList<>();
 

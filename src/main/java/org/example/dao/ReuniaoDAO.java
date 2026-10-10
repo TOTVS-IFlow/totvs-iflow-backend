@@ -45,6 +45,46 @@ public class ReuniaoDAO {
         }
     }
 
+
+    public void salvar(Connection connection, Reuniao reuniao) {
+
+        String sql = """
+                INSERT INTO meetings (
+                    client_id, title, meeting_date, status,
+                    sentiment, summary, attention_point, transcript
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(
+                sql, new String[]{"ID"})) {
+
+            statement.setInt(1, reuniao.getCliente().getId());
+            statement.setString(2, reuniao.getTitulo());
+            statement.setTimestamp(3, Timestamp.valueOf(reuniao.getData()));
+            statement.setString(4, reuniao.getStatus());
+            statement.setString(5, reuniao.getSentimento());
+            statement.setString(6, reuniao.getResumo());
+            statement.setString(7, reuniao.getPontoAtencao());
+            statement.setString(8, reuniao.getTranscricao());
+
+            statement.executeUpdate();
+
+            try (ResultSet result = statement.getGeneratedKeys()) {
+                if (result.next()) {
+                    reuniao.setId(result.getInt(1));
+                } else {
+                    throw new SQLException(
+                            "Não foi possível recuperar o ID da reunião."
+                    );
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao salvar reunião.", e);
+        }
+    }
+
     public Reuniao buscarPorId(int id) {
 
         String sql = """

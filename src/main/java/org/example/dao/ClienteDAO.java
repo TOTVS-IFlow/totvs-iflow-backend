@@ -38,6 +38,27 @@ public class ClienteDAO {
         }
     }
 
+
+    public void salvar(Connection connection, Cliente cliente) {
+
+        String sql = """
+                INSERT INTO clients (name, sector, product)
+                VALUES (?, ?, ?)
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, cliente.getNome());
+            statement.setString(2, cliente.getSetor());
+            statement.setString(3, cliente.getProduto());
+
+            statement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao salvar cliente.", e);
+        }
+    }
+
     public Cliente buscarPorId(int id) {
 
         String sql = "SELECT * FROM clients WHERE id = ?";
@@ -51,6 +72,28 @@ public class ClienteDAO {
 
             if (result.next()) {
                 return mapearCliente(result);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar cliente.", e);
+        }
+
+        return null;
+    }
+
+
+    public Cliente buscarPorId(Connection connection, int id) {
+
+        String sql = "SELECT * FROM clients WHERE id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, id);
+
+            try (ResultSet result = statement.executeQuery()) {
+                if (result.next()) {
+                    return mapearCliente(result);
+                }
             }
 
         } catch (SQLException e) {
@@ -92,6 +135,32 @@ public class ClienteDAO {
 
         try (Connection connection = ConnectionFactory.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, nome);
+
+            try (ResultSet result = statement.executeQuery()) {
+                if (result.next()) {
+                    return mapearCliente(result);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar cliente pelo nome.", e);
+        }
+
+        return null;
+    }
+
+
+    public Cliente buscarPorNome(Connection connection, String nome) {
+
+        String sql = """
+                SELECT *
+                FROM clients
+                WHERE LOWER(TRIM(name)) = LOWER(TRIM(?))
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setString(1, nome);
 

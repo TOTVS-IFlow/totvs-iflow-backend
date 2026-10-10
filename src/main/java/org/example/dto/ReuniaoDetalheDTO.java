@@ -1,13 +1,18 @@
 package org.example.dto;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 public class ReuniaoDetalheDTO {
     private int id;
     private String client;
     private String title;
-    private LocalDateTime date;
+    private Instant date;
     private String status;
     private String sentiment;
     private String summary;
@@ -26,7 +31,9 @@ public class ReuniaoDetalheDTO {
         this.id = id;
         this.client = client;
         this.title = title;
-        this.date = date;
+        this.date = date == null
+                ? null
+                : date.atZone(ZoneId.of("America/Sao_Paulo")).toInstant();
         this.status = status;
         this.sentiment = sentiment;
         this.summary = summary;
@@ -37,18 +44,53 @@ public class ReuniaoDetalheDTO {
         this.pendingItems = pendingItems;
     }
 
-    public int getId() { return id; }
-    public String getClient() { return client; }
-    public String getTitle() { return title; }
-    public LocalDateTime getDate() { return date; }
-    public String getStatus() { return status; }
-    public String getSentiment() { return sentiment; }
-    public String getSummary() { return summary; }
-    public String getAttentionPoint() { return attentionPoint; }
-    public String getTranscript() { return transcript; }
-    public List<OportunidadeDTO> getOpportunities() { return opportunities; }
-    public List<RiscoDTO> getRisks() { return risks; }
-    public List<PendenciaDTO> getPendingItems() { return pendingItems; }
+    public int getId() {
+        return id;
+    }
+
+    public String getClient() {
+        return client;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public Instant getDate() {
+        return date;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getSentiment() {
+        return sentiment;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public String getAttentionPoint() {
+        return attentionPoint;
+    }
+
+    public String getTranscript() {
+        return transcript;
+    }
+
+    public List<OportunidadeDTO> getOpportunities() {
+        return opportunities;
+    }
+
+    public List<RiscoDTO> getRisks() {
+        return risks;
+    }
+
+    public List<PendenciaDTO> getPendingItems() {
+        return pendingItems;
+    }
 
     public static class OportunidadeDTO {
         private String tag;
@@ -59,8 +101,13 @@ public class ReuniaoDetalheDTO {
             this.description = description;
         }
 
-        public String getTag() { return tag; }
-        public String getDescription() { return description; }
+        public String getTag() {
+            return tag;
+        }
+
+        public String getDescription() {
+            return description;
+        }
     }
 
     public static class RiscoDTO {
@@ -72,8 +119,13 @@ public class ReuniaoDetalheDTO {
             this.description = description;
         }
 
-        public String getLevel() { return level; }
-        public String getDescription() { return description; }
+        public String getLevel() {
+            return level;
+        }
+
+        public String getDescription() {
+            return description;
+        }
     }
 
     public static class PendenciaDTO {
@@ -89,9 +141,20 @@ public class ReuniaoDetalheDTO {
             this.status = status;
         }
 
-        public int getId() { return id; }
-        public String getDescription() { return description; }
-        public String getOwner() { return owner; }
-        public String getStatus() { return status; }
+        public int getId() {
+            return id;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public String getOwner() {
+            return owner;
+        }
+
+        public String getStatus() {
+            return status;
+        }
     }
 }
